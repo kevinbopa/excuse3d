@@ -1,4 +1,4 @@
-import { cp, mkdir, rm } from "node:fs/promises";
+import { cp, mkdir, rm, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -31,7 +31,17 @@ await cp(
 );
 
 for (const asset of assetsToCopy) {
-  await cp(path.join(rootDir, asset), path.join(distDir, asset));
+  const assetPath = path.join(rootDir, asset);
+  try {
+    await stat(assetPath);
+    await cp(assetPath, path.join(distDir, asset));
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.warn(`Asset not found, skipping: ${asset}`);
+    } else {
+      throw err;
+    }
+  }
 }
 
 console.log(`Build complete in ${distDir}`);
