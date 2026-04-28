@@ -19,15 +19,16 @@ const assetsToCopy = [
 await rm(distDir, { recursive: true, force: true });
 await mkdir(distDir, { recursive: true });
 await cp(clientDir, distDir, { recursive: true });
-await mkdir(path.join(distDir, "node_modules", "three", "build"), { recursive: true });
-await mkdir(path.join(distDir, "node_modules", "three", "examples", "jsm", "loaders"), { recursive: true });
+await mkdir(path.join(distDir, "node_modules", "three"), { recursive: true });
 await cp(
-  path.join(rootDir, "node_modules", "three", "build", "three.module.js"),
-  path.join(distDir, "node_modules", "three", "build", "three.module.js")
+  path.join(rootDir, "node_modules", "three", "build"),
+  path.join(distDir, "node_modules", "three", "build"),
+  { recursive: true }
 );
 await cp(
-  path.join(rootDir, "node_modules", "three", "examples", "jsm", "loaders", "GLTFLoader.js"),
-  path.join(distDir, "node_modules", "three", "examples", "jsm", "loaders", "GLTFLoader.js")
+  path.join(rootDir, "node_modules", "three", "examples"),
+  path.join(distDir, "node_modules", "three", "examples"),
+  { recursive: true }
 );
 
 for (const asset of assetsToCopy) {
