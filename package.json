@@ -1,0 +1,18 @@
+{
+  "name": "alae-journey",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/generate-models.mjs",
+    "prebuild": "node scripts/generate-models.mjs",
+    "prepreview": "node scripts/generate-models.mjs",
+    "dev": "node scripts/dev-server.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/preview-server.mjs",
+    "graphify": "node scripts/graphify.mjs"
+  },
+  "dependencies": {
+    "three": "^0.184.0"
+  }
+}
