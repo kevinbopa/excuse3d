@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { animateAngelModel, configureShadowTree, styleAngelModel } from "./avatar.js";
 
 const SCALE = 0.12;
-const ANGEL_MODEL_SRC = "/src/client/assets/models/angel.gltf";
+const ANGEL_MODEL_SRC = "../../assets/models/angel.gltf";
 
 function worldUnit(value) {
   return value * SCALE;

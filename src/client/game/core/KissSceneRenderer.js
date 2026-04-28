@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { animateAngelModel, configureShadowTree, poseGorillaModel, styleAngelModel } from "./avatar.js";
 
-const ANGEL_MODEL_SRC = "/src/client/assets/models/angel.gltf";
-const GORILLA_MODEL_SRC = "/src/client/assets/models/gorilla.gltf";
+const ANGEL_MODEL_SRC = "../../assets/models/angel.gltf";
+const GORILLA_MODEL_SRC = "../../assets/models/gorilla.gltf";
 
 export class KissSceneRenderer {
   constructor(canvas, assets) {
