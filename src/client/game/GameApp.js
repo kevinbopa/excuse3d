@@ -37,6 +37,9 @@ export class GameApp {
     this.toastTimer = 0;
     this.currentInteraction = null;
     this.modalLock = true;
+    this.mobileUi = false;
+    this.hudCollapsed = false;
+    this.userToggledHud = false;
     this.lastTime = performance.now();
     this.time = 0;
     this.camera = {
@@ -82,6 +85,7 @@ export class GameApp {
             <h1>Alae Journey</h1>
           </div>
           <div class="topbar-actions">
+            <button class="secondary-button mobile-only" data-ui="toggle-hud">Infos</button>
             <button class="secondary-button" data-ui="reset">Recommencer</button>
           </div>
         </header>
@@ -123,14 +127,16 @@ export class GameApp {
         <div class="toast hidden" data-ui="toast"></div>
 
         <div class="touch-controls hidden" data-ui="touch-controls">
-          <div class="pad">
-            <button class="touch-button" data-move="up">▲</button>
-            <div class="pad-middle">
-              <button class="touch-button" data-move="left">◀</button>
-              <button class="touch-button center" data-action="interact">E</button>
-              <button class="touch-button" data-move="right">▶</button>
+          <div class="touch-stick-wrap">
+            <div class="touch-stick" data-ui="touch-stick">
+              <div class="touch-stick-ring"></div>
+              <div class="touch-stick-thumb" data-ui="touch-thumb"></div>
             </div>
-            <button class="touch-button" data-move="down">▼</button>
+            <p class="touch-caption">Deplacement</p>
+          </div>
+          <div class="touch-actions">
+            <button class="touch-button touch-button-large center" data-action="interact">Interagir</button>
+            <button class="touch-button touch-button-secondary" data-ui="toggle-hud-secondary">Infos</button>
           </div>
         </div>
 
@@ -156,7 +162,7 @@ export class GameApp {
               <p class="feedback" data-ui="password-feedback"></p>
               <div class="modal-actions split-actions">
                 <button class="secondary-button" data-ui="back-name">Retour</button>
-                <button class="primary-button" data-ui="password-next">Déverrouiller</button>
+                <button class="primary-button" data-ui="password-next">Deverrouiller</button>
               </div>
             </div>
           </div>
@@ -203,9 +209,9 @@ export class GameApp {
             <h2>Le Bisou surprise</h2>
             <div class="kiss-scene" data-ui="kiss-scene">
               <canvas class="kiss-canvas" data-ui="kiss-canvas" aria-hidden="true"></canvas>
-              <div class="kiss-heart heart-a">❤</div>
-              <div class="kiss-heart heart-b">❤</div>
-              <div class="kiss-heart heart-c">❤</div>
+              <div class="kiss-heart heart-a">&#10084;</div>
+              <div class="kiss-heart heart-b">&#10084;</div>
+              <div class="kiss-heart heart-c">&#10084;</div>
             </div>
             <p>Un gorille stylise sort de la maison, avance avec gravite, s'approche du petit angel puis lui donne un bisou dramatique et cute avant de repartir dans un nuage de coeurs.</p>
             <div class="modal-actions">
@@ -244,9 +250,13 @@ export class GameApp {
   }
 
   bindElements() {
+    this.gameShell = this.root.querySelector(".game-shell");
     this.canvas = this.root.querySelector(".game-canvas");
+    this.hud = this.root.querySelector(".hud");
     this.minimapCanvas = this.root.querySelector(".minimap-canvas");
     this.touchControls = this.root.querySelector('[data-ui="touch-controls"]');
+    this.touchStick = this.root.querySelector('[data-ui="touch-stick"]');
+    this.touchThumb = this.root.querySelector('[data-ui="touch-thumb"]');
     this.toast = this.root.querySelector('[data-ui="toast"]');
     this.prompt = this.root.querySelector('[data-ui="prompt"]');
     this.worldName = this.root.querySelector('[data-ui="world-name"]');
@@ -289,6 +299,8 @@ export class GameApp {
     this.letterContent = this.root.querySelector('[data-ui="letter-content"]');
     this.kissScene = this.root.querySelector('[data-ui="kiss-scene"]');
     this.kissCanvas = this.root.querySelector('[data-ui="kiss-canvas"]');
+    this.toggleHudButton = this.root.querySelector('[data-ui="toggle-hud"]');
+    this.toggleHudButtonSecondary = this.root.querySelector('[data-ui="toggle-hud-secondary"]');
   }
 
   bindEvents() {
@@ -306,6 +318,8 @@ export class GameApp {
     this.root.querySelector('[data-ui="back-name"]').addEventListener("click", () => this.showAuthStep("name"));
     this.root.querySelector('[data-ui="close-hint"]').addEventListener("click", () => this.modals.hint.classList.add("hidden"));
     this.startGameButton.addEventListener("click", () => this.startGame());
+    this.toggleHudButton.addEventListener("click", () => this.toggleMobileHud());
+    this.toggleHudButtonSecondary.addEventListener("click", () => this.toggleMobileHud());
     this.root.querySelector('[data-ui="choose-morale"]').addEventListener("click", () => this.resolveHouseChoice("morale"));
     this.root.querySelector('[data-ui="choose-luxury"]').addEventListener("click", () => this.resolveHouseChoice("luxury"));
     this.root.querySelector('[data-ui="close-kiss"]').addEventListener("click", () => this.finishKissScene());
@@ -457,6 +471,8 @@ export class GameApp {
     this.messageExtra.classList.add("hidden");
     this.toast.classList.add("hidden");
     this.prompt.classList.add("hidden");
+    this.hudCollapsed = false;
+    this.userToggledHud = false;
     this.ensureWorldState(this.state.worldIndex);
     this.renderCharacterCards();
     this.syncFlow();
@@ -491,7 +507,7 @@ export class GameApp {
     const axis = this.input.moveAxis();
     if (axis.x !== 0 || axis.y !== 0) {
       const length = Math.hypot(axis.x, axis.y) || 1;
-      const speed = 320;
+      const speed = this.mobileUi ? 350 : 320;
       const nextX = clamp(this.player.x + (axis.x / length) * speed * delta, -WORLD_LIMIT, WORLD_LIMIT);
       const nextY = clamp(this.player.y + (axis.y / length) * speed * delta, -WORLD_LIMIT, WORLD_LIMIT);
       const world = this.currentWorld();
@@ -604,7 +620,7 @@ export class GameApp {
     }
     if (this.currentInteraction.type === "house") {
       this.pendingHouse = this.currentInteraction.house;
-      this.choiceTag.textContent = `${this.currentWorld().subtitle} · Maison ${this.pendingHouse.number}`;
+      this.choiceTag.textContent = `${this.currentWorld().subtitle} - Maison ${this.pendingHouse.number}`;
       this.choiceTitle.textContent = this.pendingHouse.title;
       this.openModal("choice");
       return;
@@ -661,13 +677,13 @@ export class GameApp {
       worldState.hasKey = true;
     }
 
-    this.messageTag.textContent = `${this.currentWorld().subtitle} · Maison ${house.number}`;
+    this.messageTag.textContent = `${this.currentWorld().subtitle} - Maison ${house.number}`;
     this.messageTitle.textContent = house.title;
     this.messageText.textContent = house.text;
 
     if (reward) {
       this.messageReward.textContent = reward === "Bisou"
-        ? "Article de luxe obtenu : Bisou. Le personnage porte maintenant ce souvenir-là aussi."
+        ? "Article de luxe obtenu : Bisou. Le personnage porte maintenant ce souvenir-la aussi."
         : `Article de luxe obtenu : ${reward}. Il est maintenant ajoute au personnage.`;
       this.messageReward.classList.remove("hidden");
     } else {
@@ -719,7 +735,7 @@ export class GameApp {
 
     const character = this.currentCharacter();
     this.characterName.textContent = character.name;
-    this.characterRole.textContent = `${character.role} · ${character.description}`;
+    this.characterRole.textContent = `${character.role} - ${character.description}`;
     this.avatarSwatch.style.background = `linear-gradient(135deg, ${character.float}, ${character.accent})`;
 
     this.inventoryList.innerHTML = "";
@@ -741,8 +757,12 @@ export class GameApp {
       return;
     }
     this.prompt.textContent = this.currentInteraction.type === "house"
-      ? `Appuie sur E pour entrer dans la maison ${this.currentInteraction.house.number}`
-      : (this.portalUnlocked(this.state.worldIndex) ? "Appuie sur E pour ouvrir la porte" : "La porte est encore verrouillee");
+      ? (this.mobileUi
+        ? `Touchez Interagir pour entrer dans la maison ${this.currentInteraction.house.number}`
+        : `Appuie sur E pour entrer dans la maison ${this.currentInteraction.house.number}`)
+      : (this.portalUnlocked(this.state.worldIndex)
+        ? (this.mobileUi ? "Touchez Interagir pour ouvrir la porte" : "Appuie sur E pour ouvrir la porte")
+        : "La porte est encore verrouillee");
     this.prompt.classList.remove("hidden");
   }
 
@@ -772,7 +792,33 @@ export class GameApp {
 
   updateTouchVisibility() {
     const visible = window.innerWidth <= 860 || "ontouchstart" in window;
+    this.mobileUi = visible;
     this.touchControls.classList.toggle("hidden", !visible);
+    this.gameShell.classList.toggle("mobile-ui", visible);
+
+    if (!visible) {
+      this.hudCollapsed = false;
+      this.userToggledHud = false;
+    } else if (!this.userToggledHud) {
+      this.hudCollapsed = true;
+    }
+
+    this.gameShell.classList.toggle("hud-collapsed", visible && this.hudCollapsed);
+    const label = this.hudCollapsed ? "Infos" : "Fermer";
+    this.toggleHudButton.textContent = label;
+    this.toggleHudButtonSecondary.textContent = label;
+  }
+
+  toggleMobileHud() {
+    if (!this.mobileUi) {
+      return;
+    }
+    this.userToggledHud = true;
+    this.hudCollapsed = !this.hudCollapsed;
+    this.gameShell.classList.toggle("hud-collapsed", this.hudCollapsed);
+    const label = this.hudCollapsed ? "Infos" : "Fermer";
+    this.toggleHudButton.textContent = label;
+    this.toggleHudButtonSecondary.textContent = label;
   }
 
   showToast(text) {
