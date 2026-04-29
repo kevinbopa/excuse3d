@@ -1,22 +1,28 @@
 # Alae Journey
 
-Refonte en architecture plus professionnelle, avec un vrai point d'entree `npm run dev`.
+Refonte en architecture plus professionnelle, avec un vrai point d'entree `npm run dev` et une separation claire entre code source, assets publics et build.
 
 ## Scripts
 
-- `npm run dev` : lance le serveur local de developpement sur `http://localhost:5173`
+- `npm run dev` : prepare les assets publics, genere les modeles puis lance le serveur local
 - `npm run build` : copie le client et les assets vers `dist/`
-- `npm run preview` : lance le meme serveur sur `http://localhost:4173`
+- `npm run preview` : prepare les assets puis lance la version `dist/`
 - `npm run graphify` : genere une carte du projet dans `.graphify/`
 
 ## Structure
 
-- `scripts/` : serveur local et build
+- `public/` : images, modeles glTF generes et vendor web pour Three.js
+- `scripts/` : scripts de preparation, serveur local et build
 - `.graphify/` : vue compacte du projet en JSON + Markdown
 - `src/client/` : client web modulaire
 - `src/client/game/core/` : input, rendu, sauvegarde, assets
 - `src/client/game/data/` : donnees du jeu
 - `src/client/game/GameApp.js` : orchestration principale
+
+## Notes local
+
+- Si `5173` est deja pris, le serveur local bascule automatiquement sur le prochain port libre et affiche l'URL exacte dans le terminal.
+- Le local sert maintenant `public/` puis `src/client/`, ce qui rapproche son comportement de Vercel et evite les erreurs de resolution de fichiers.
 
 ## Fonctionnalites deja incluses
 
