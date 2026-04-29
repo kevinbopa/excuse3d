@@ -7,7 +7,8 @@ const rootDir = path.resolve(__dirname, "..");
 const outputDir = path.join(rootDir, ".graphify");
 const targets = [
   path.join(rootDir, "src"),
-  path.join(rootDir, "scripts")
+  path.join(rootDir, "scripts"),
+  path.join(rootDir, "public")
 ];
 
 const sourceExtensions = new Set([".js", ".mjs", ".css", ".html", ".json", ".gltf"]);
@@ -32,8 +33,10 @@ function classify(filePath) {
   if (rel.startsWith("src/client/game/data/")) return "data";
   if (rel.startsWith("src/client/game/")) return "game";
   if (rel.startsWith("src/client/styles/")) return "style";
-  if (rel.startsWith("src/client/assets/models/")) return "model";
-  if (rel.startsWith("src/client/assets/")) return "asset";
+  if (rel.startsWith("public/assets/models/")) return "model";
+  if (rel.startsWith("public/assets/")) return "asset";
+  if (rel.startsWith("public/vendor/")) return "vendor";
+  if (rel.startsWith("public/")) return "public";
   if (rel.startsWith("src/client/")) return "client";
   if (rel.startsWith("scripts/")) return "tooling";
   return "other";
@@ -96,11 +99,16 @@ function summaryForNode(node) {
   if (node.path.endsWith("main.js")) return "Point d'entree du client.";
   if (node.path.endsWith("index.html")) return "Shell HTML de l'application.";
   if (node.path.endsWith("main.css")) return "Styles globaux, HUD et modales.";
+  if (node.path.endsWith("config.mjs")) return "Configuration centrale des chemins et ports.";
   if (node.path.endsWith("dev-server.mjs")) return "Serveur de developpement local.";
+  if (node.path.endsWith("preview-server.mjs")) return "Serveur de preview base sur dist.";
+  if (node.path.endsWith("static-server.mjs")) return "Serveur statique partage avec fallback SPA et port auto.";
+  if (node.path.endsWith("prepare-public.mjs")) return "Preparation des assets publics et du vendor browser.";
   if (node.path.endsWith("build.mjs")) return "Build local vers dist.";
   if (node.path.endsWith("generate-models.mjs")) return "Generation locale des modeles glTF.";
   if (node.path.endsWith("graphify.mjs")) return "Generation de la carte du projet.";
   if (node.path.endsWith(".gltf")) return "Modele 3D consomme par le jeu.";
+  if (node.path.includes("public/assets/images/")) return "Image publique consommee par le jeu.";
   return "Module du projet.";
 }
 
@@ -161,7 +169,7 @@ const graph = {
     models: rawNodes.filter((node) => node.kind === "model").length
   },
   entrypoints: rawNodes
-    .filter((node) => ["src/client/main.js", "scripts/dev-server.mjs", "scripts/build.mjs", "scripts/preview-server.mjs", "scripts/generate-models.mjs"].includes(node.path))
+    .filter((node) => ["src/client/main.js", "scripts/dev-server.mjs", "scripts/build.mjs", "scripts/preview-server.mjs", "scripts/generate-models.mjs", "scripts/prepare-public.mjs"].includes(node.path))
     .map((node) => ({
       path: node.path,
       summary: node.summary

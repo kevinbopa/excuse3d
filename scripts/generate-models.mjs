@@ -1,8 +1,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import * as THREE from "three";
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
+import { publicModelsDir as outputDir } from "./config.mjs";
 
 globalThis.FileReader ??= class FileReader {
   constructor() {
@@ -18,10 +18,6 @@ globalThis.FileReader ??= class FileReader {
     }
   }
 };
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.resolve(__dirname, "..");
-const outputDir = path.join(rootDir, "src", "client", "assets", "models");
 
 function createMaterial(name, color, options = {}) {
   return new THREE.MeshStandardMaterial({

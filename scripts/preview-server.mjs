@@ -1,2 +1,8 @@
-process.env.PORT = process.env.PORT || "4173";
-await import("./dev-server.mjs");
+import { defaultPreviewPort, distDir } from "./config.mjs";
+import { startStaticServer } from "./static-server.mjs";
+
+await startStaticServer({
+  roots: [distDir],
+  preferredPort: defaultPreviewPort,
+  name: "Alae Journey preview server"
+});
