@@ -77,6 +77,18 @@ input {
   z-index: 2;
 }
 
+.screen-grade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 240, 190, 0.12), transparent 26%),
+    radial-gradient(circle at 50% 55%, transparent 38%, rgba(8, 14, 28, 0.16) 100%),
+    linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08));
+  mix-blend-mode: screen;
+}
+
 .topbar {
   top: max(14px, env(safe-area-inset-top));
   left: 16px;
