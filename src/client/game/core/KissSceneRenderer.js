@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { animateAngelModel, configureShadowTree, poseGorillaModel, styleAngelModel } from "./avatar.js";
 
-const ANGEL_MODEL_SRC = "../../assets/models/angel.gltf";
-const GORILLA_MODEL_SRC = "../../assets/models/gorilla.gltf";
+const ANGEL_MODEL_SRC = "/assets/models/angel.gltf";
+const GORILLA_MODEL_SRC = "/assets/models/gorilla.gltf";
 
 export class KissSceneRenderer {
   constructor(canvas, assets) {
@@ -23,7 +23,7 @@ export class KissSceneRenderer {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.12;
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);

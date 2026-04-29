@@ -168,10 +168,10 @@ export const WORLDS = [
       }
     ],
     decorations: [
-      { type: "billboard", x: -560, y: -220, src: "/images.jpg", frame: "#fff0ff" },
-      { type: "billboard", x: 570, y: -230, src: "/images (1).jpg", frame: "#fff0ff" },
-      { type: "billboard", x: -220, y: 340, src: "/t\u00e9l\u00e9chargement.jpg", frame: "#fff0ff" },
-      { type: "billboard", x: 250, y: 330, src: "/t\u00e9l\u00e9chargement (1).jpg", frame: "#fff0ff" },
+      { type: "billboard", x: -560, y: -220, src: "/assets/images/japanese-apology-1.jpg", frame: "#fff0ff" },
+      { type: "billboard", x: 570, y: -230, src: "/assets/images/japanese-apology-2.jpg", frame: "#fff0ff" },
+      { type: "billboard", x: -220, y: 340, src: "/assets/images/japanese-apology-3.jpg", frame: "#fff0ff" },
+      { type: "billboard", x: 250, y: 330, src: "/assets/images/japanese-apology-4.jpg", frame: "#fff0ff" },
       { type: "pond", x: -410, y: -360, rx: 150, ry: 84 },
       { type: "crystal", x: 160, y: -330, color: "#ffe0ff", size: 48 }
     ]

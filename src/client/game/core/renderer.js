@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { animateAngelModel, configureShadowTree, styleAngelModel } from "./avatar.js";
 
 const SCALE = 0.12;
-const ANGEL_MODEL_SRC = "../../assets/models/angel.gltf";
+const ANGEL_MODEL_SRC = "/assets/models/angel.gltf";
 
 function worldUnit(value) {
   return value * SCALE;
@@ -41,7 +41,7 @@ export class WorldRenderer {
     });
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.1;
 
