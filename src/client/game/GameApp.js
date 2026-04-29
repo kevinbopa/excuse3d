@@ -5,7 +5,7 @@ import { WorldRenderer } from "./core/renderer.js";
 import { createDefaultState, loadState, resetState, saveState } from "./core/save.js";
 import { AUTH, CHARACTERS, FINAL_LETTER, LUXURY_ITEMS, WORLDS } from "./data/worlds.js";
 
-const WORLD_LIMIT = 760;
+const WORLD_LIMIT = 1180;
 const PLAYER_RADIUS = 44;
 const INTERACTION_DISTANCE = 170;
 
@@ -50,7 +50,12 @@ export class GameApp {
       x: this.state.player.x,
       y: this.state.player.y,
       bob: 0,
-      facing: 0
+      facing: 0,
+      speed: 0,
+      locomotion: 0,
+      runBlend: 0,
+      moveX: 0,
+      moveY: 0
     };
   }
 
@@ -77,6 +82,7 @@ export class GameApp {
     return `
       <div class="game-shell">
         <canvas class="game-canvas" aria-label="Monde de jeu"></canvas>
+        <div class="screen-grade" aria-hidden="true"></div>
         <canvas class="minimap-canvas" aria-hidden="true"></canvas>
 
         <header class="topbar">
@@ -459,7 +465,17 @@ export class GameApp {
     this.toastTimer = 0;
     this.currentInteraction = null;
     this.modalLock = true;
-    this.player = { x: 0, y: 0, bob: 0, facing: 0 };
+    this.player = {
+      x: 0,
+      y: 0,
+      bob: 0,
+      facing: 0,
+      speed: 0,
+      locomotion: 0,
+      runBlend: 0,
+      moveX: 0,
+      moveY: 0
+    };
     this.camera = { x: 0, y: 0 };
     this.lastTime = performance.now();
     this.input.clear();
@@ -505,11 +521,24 @@ export class GameApp {
     }
 
     const axis = this.input.moveAxis();
-    if (axis.x !== 0 || axis.y !== 0) {
-      const length = Math.hypot(axis.x, axis.y) || 1;
-      const speed = this.mobileUi ? 350 : 320;
-      const nextX = clamp(this.player.x + (axis.x / length) * speed * delta, -WORLD_LIMIT, WORLD_LIMIT);
-      const nextY = clamp(this.player.y + (axis.y / length) * speed * delta, -WORLD_LIMIT, WORLD_LIMIT);
+    const rawLength = Math.min(Math.hypot(axis.x, axis.y), 1);
+    const activeMove = rawLength > 0.02;
+    const wantsRun = activeMove && (this.mobileUi ? rawLength > 0.74 : this.input.runPressed());
+    const normalizedX = activeMove ? axis.x / rawLength : 0;
+    const normalizedY = activeMove ? axis.y / rawLength : 0;
+    const walkSpeed = this.mobileUi ? 290 : 270;
+    const runSpeed = this.mobileUi ? 415 : 390;
+    const targetSpeed = activeMove ? (wantsRun ? runSpeed : walkSpeed) * rawLength : 0;
+
+    this.player.speed += (targetSpeed - this.player.speed) * Math.min(1, delta * 7.5);
+    this.player.locomotion += (((activeMove ? 0.55 : 0) + (wantsRun ? 0.45 : 0)) * rawLength - this.player.locomotion) * Math.min(1, delta * 9);
+    this.player.runBlend += ((wantsRun ? 1 : 0) - this.player.runBlend) * Math.min(1, delta * 7);
+    this.player.moveX += (normalizedX - this.player.moveX) * Math.min(1, delta * 10);
+    this.player.moveY += (normalizedY - this.player.moveY) * Math.min(1, delta * 10);
+
+    if (activeMove) {
+      const nextX = clamp(this.player.x + normalizedX * this.player.speed * delta, -WORLD_LIMIT, WORLD_LIMIT);
+      const nextY = clamp(this.player.y + normalizedY * this.player.speed * delta, -WORLD_LIMIT, WORLD_LIMIT);
       const world = this.currentWorld();
       if (!this.houseCollision(nextX, this.player.y, world)) {
         this.player.x = nextX;
@@ -517,8 +546,8 @@ export class GameApp {
       if (!this.houseCollision(this.player.x, nextY, world)) {
         this.player.y = nextY;
       }
-      this.player.facing = Math.atan2(axis.x, axis.y);
-      this.player.bob += delta * 8;
+      this.player.facing = Math.atan2(normalizedX, normalizedY);
+      this.player.bob += delta * (wantsRun ? 14 : 9);
     }
 
     this.camera.x += (this.player.x - this.camera.x) * 0.14;
@@ -576,9 +605,14 @@ export class GameApp {
   }
 
   setSpawn() {
-    this.player.x = 0;
-    this.player.y = 320;
+    this.player.x = 90;
+    this.player.y = 430;
     this.player.facing = 0;
+    this.player.speed = 0;
+    this.player.locomotion = 0;
+    this.player.runBlend = 0;
+    this.player.moveX = 0;
+    this.player.moveY = 0;
     this.camera.x = this.player.x;
     this.camera.y = this.player.y;
     this.state.player = { x: this.player.x, y: this.player.y };
@@ -731,7 +765,7 @@ export class GameApp {
     this.portalStatus.textContent = this.portalUnlocked(this.state.worldIndex)
       ? (this.state.worldIndex === WORLDS.length - 1 ? "Pret pour la lettre" : "Prete a s'ouvrir")
       : "Verrouillee";
-    this.hintText.textContent = world.hint;
+    this.hintText.textContent = `${world.hint} Ta maison dans ce royaume : ${world.homeLabel}. ${this.mobileUi ? "Pousse le joystick loin pour courir." : "Maintiens Shift pour courir."}`;
 
     const character = this.currentCharacter();
     this.characterName.textContent = character.name;

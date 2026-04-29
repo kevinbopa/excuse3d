@@ -145,6 +145,10 @@ export class InputController {
     };
   }
 
+  runPressed() {
+    return this.pressed(["shift"]);
+  }
+
   clear() {
     this.keys.clear();
     this.touch.clear();

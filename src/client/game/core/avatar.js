@@ -214,12 +214,122 @@ export function styleAngelModel(root, character, inventory = []) {
   const leftShoulderAnchor = root.getObjectByName("LeftShoulderAnchor");
   const leftWristAnchor = root.getObjectByName("LeftWristAnchor");
   const cheekAnchor = root.getObjectByName("CheekAnchor");
+  const head = root.getObjectByName("Head");
+  const hairMesh = root.getObjectByName("Hair");
+  const torso = root.getObjectByName("Torso");
+  const bloomers = root.getObjectByName("Bloomers");
+  const belly = root.getObjectByName("Belly");
+  const armL = root.getObjectByName("ArmL");
+  const armR = root.getObjectByName("ArmR");
+  const legL = root.getObjectByName("LegL");
+  const legR = root.getObjectByName("LegR");
+  const footL = root.getObjectByName("FootL");
+  const footR = root.getObjectByName("FootR");
+  const eyeL = root.getObjectByName("EyeL");
+  const eyeR = root.getObjectByName("EyeR");
+  const blushL = root.getObjectByName("BlushL");
+  const blushR = root.getObjectByName("BlushR");
+  const mouth = root.getObjectByName("Mouth");
+  const floatRing = root.getObjectByName("FloatRing");
+  const halo = root.getObjectByName("Halo");
+  const wingL = root.getObjectByName("WingL");
+  const wingR = root.getObjectByName("WingR");
 
   clearAnchor(hatAnchor);
   clearAnchor(rightHandAnchor);
   clearAnchor(leftShoulderAnchor);
   clearAnchor(leftWristAnchor);
   clearAnchor(cheekAnchor);
+
+  if (head) {
+    head.scale.set(1.12, 1.08, 1.1);
+    head.position.y = 13.5;
+  }
+  if (hairMesh) {
+    hairMesh.scale.set(1.08, 1.04, 1.06);
+    hairMesh.position.y = 14.15;
+  }
+  if (torso) {
+    torso.scale.set(0.92, 0.88, 0.92);
+    torso.position.y = 6.55;
+  }
+  if (bloomers) {
+    bloomers.scale.set(1.06, 0.72, 1.04);
+    bloomers.position.y = 5.1;
+  }
+  if (belly) {
+    belly.scale.set(1.12, 0.94, 0.8);
+    belly.position.set(0, 6.05, 1.75);
+  }
+  if (armL) {
+    armL.scale.set(0.92, 0.92, 0.92);
+    armL.position.set(-2.72, 6.92, 0.42);
+    armL.rotation.z = -0.42;
+  }
+  if (armR) {
+    armR.scale.set(0.92, 0.92, 0.92);
+    armR.position.set(2.72, 6.92, 0.42);
+    armR.rotation.z = 0.42;
+  }
+  if (legL) {
+    legL.scale.set(0.94, 0.86, 0.94);
+    legL.position.set(-1.02, 2.55, 0.2);
+  }
+  if (legR) {
+    legR.scale.set(0.94, 0.86, 0.94);
+    legR.position.set(1.02, 2.55, 0.2);
+  }
+  if (footL) {
+    footL.scale.set(1.42, 0.78, 1.72);
+    footL.position.set(-1.08, 0.96, 1.14);
+  }
+  if (footR) {
+    footR.scale.set(1.42, 0.78, 1.72);
+    footR.position.set(1.08, 0.96, 1.14);
+  }
+  if (eyeL && eyeR) {
+    eyeL.scale.set(0.92, 1.32, 0.92);
+    eyeR.scale.set(0.92, 1.32, 0.92);
+    eyeL.position.set(-1.26, 13.55, 4.12);
+    eyeR.position.set(1.26, 13.55, 4.12);
+  }
+  if (blushL && blushR) {
+    blushL.scale.set(1.42, 0.72, 0.42);
+    blushR.scale.set(1.42, 0.72, 0.42);
+    blushL.position.set(-2.42, 12.5, 3.88);
+    blushR.position.set(2.42, 12.5, 3.88);
+  }
+  if (mouth) {
+    mouth.scale.set(0.82, 0.82, 0.82);
+    mouth.position.set(0, 12.1, 4.18);
+  }
+  if (floatRing) {
+    floatRing.visible = false;
+  }
+  if (halo) {
+    halo.visible = false;
+  }
+  if (wingL && wingR) {
+    wingL.scale.set(0.42, 0.98, 0.66);
+    wingR.scale.set(0.42, 0.98, 0.66);
+    wingL.position.set(-2.28, 7.4, -1.24);
+    wingR.position.set(2.28, 7.4, -1.24);
+  }
+  if (hatAnchor) {
+    hatAnchor.position.set(0, 17.25, 0);
+  }
+  if (rightHandAnchor) {
+    rightHandAnchor.position.set(3.78, 6.02, 1.02);
+  }
+  if (leftShoulderAnchor) {
+    leftShoulderAnchor.position.set(-3.58, 8.86, 0.02);
+  }
+  if (leftWristAnchor) {
+    leftWristAnchor.position.set(-2.88, 6.16, 0.6);
+  }
+  if (cheekAnchor) {
+    cheekAnchor.position.set(3.2, 13.02, 3.44);
+  }
 
   hatAnchor?.add(createHat(character));
 
@@ -237,7 +347,7 @@ export function styleAngelModel(root, character, inventory = []) {
   }
 }
 
-export function animateAngelModel(root, time, bobAmount = 0) {
+export function animateAngelModel(root, time, locomotion = 0, runBlend = 0) {
   if (!root) {
     return;
   }
@@ -247,6 +357,15 @@ export function animateAngelModel(root, time, bobAmount = 0) {
   const wingL = root.getObjectByName("WingL");
   const wingR = root.getObjectByName("WingR");
   const hatAnchor = root.getObjectByName("HatAnchor");
+  const legL = root.getObjectByName("LegL");
+  const legR = root.getObjectByName("LegR");
+  const armL = root.getObjectByName("ArmL");
+  const armR = root.getObjectByName("ArmR");
+  const footL = root.getObjectByName("FootL");
+  const footR = root.getObjectByName("FootR");
+  const swing = locomotion * (0.22 + runBlend * 0.18);
+  const cadence = 2.3 + runBlend * 2.2;
+  const breath = 0.018 + locomotion * 0.01;
 
   if (ring) {
     ring.rotation.z = time * 0.8;
@@ -261,9 +380,21 @@ export function animateAngelModel(root, time, bobAmount = 0) {
   if (hatAnchor) {
     hatAnchor.rotation.z = Math.sin(time * 1.9) * 0.05;
   }
+  if (armL && armR) {
+    armL.rotation.x = Math.sin(time * cadence) * swing;
+    armR.rotation.x = -Math.sin(time * cadence) * swing;
+  }
+  if (legL && legR) {
+    legL.rotation.x = Math.sin(time * cadence) * swing * 1.25;
+    legR.rotation.x = -Math.sin(time * cadence) * swing * 1.25;
+  }
+  if (footL && footR) {
+    footL.rotation.x = -0.12 + Math.sin(time * cadence) * swing * 0.45;
+    footR.rotation.x = -0.12 - Math.sin(time * cadence) * swing * 0.45;
+  }
 
-  root.rotation.z = Math.sin(time * 2.1) * 0.02;
-  root.position.y = bobAmount;
+  root.rotation.z = Math.sin(time * 2.1) * breath;
+  root.position.y = Math.sin(time * cadence * 0.5) * locomotion * 0.09;
 }
 
 export function poseGorillaModel(root, timeline) {
